@@ -6,55 +6,57 @@ object day1
 {
 
 def main(args:Array[String]):Unit ={
-val inputFile = Source.fromFile("inputs/input1.txt")
-val lines = inputFile.getLines().toList
-inputFile.close()
 
 
-val digitMap: Map[String, Int] = Map(
-    "one" -> 1, "two" -> 2, "three" -> 3, "four" -> 4, "five" -> 5,
-    "six" -> 6, "seven" -> 7, "eight" -> 8, "nine" -> 9
-  )
-
-def extractCalibrationValue_1a(line: String): Int = {
-  val digits = line.filter(_.isDigit)
-  digits.length match {
-    case 0 => 0 // No digits in the line
-    case 1 => (digits + digits).toInt 
-    case _ => (digits.head.toString + digits.last.toString).toInt
-  }
+def part1: Int = {
+  val regex: Regex = """\d""".r
+  Source
+    .fromResource("inputs/input1.txt")
+    .getLines
+    .flatMap { line =>
+      val all = regex.findAllIn(line).map(_.toInt).toVector
+      for {
+        f <- all.headOption
+        l <- all.lastOption
+      } yield f * 10 + l
+    }
+    .sum
 }
 
 
-  def extractCalibrationValue_1b(line: String): Int = {
-    val replacedLine = digitMap.foldLeft(line) {
-      case (acc, (word, num)) =>
-        val wordPattern: Regex = s"\\b$word\\b".r
-        wordPattern.replaceAllIn(acc, num.toString)
+def part2: Int = {
+val replacements: Map[String, String] = Map(
+    "one" -> "one1one",
+    "two" -> "two2two",
+    "three" -> "three3three",
+    "four" -> "four4four",
+    "five" -> "five5five",
+    "six" -> "six6six",
+    "seven" -> "seven7seven",
+    "eight" -> "eight8eight",
+    "nine" -> "nine9nine"
+  )
+  val regex: Regex = """\d""".r
+  Source
+    .fromResource("inputs/input1.txt")
+    .getLines
+    .map { line =>
+    val replacedLine = replacements.foldLeft(line)((acc, replacement) => acc.replaceAll(replacement._1, replacement._2))
+    val allDigits: Vector[Int] = regex.findAllIn(replacedLine).map(_.toInt).toVector
+      (allDigits.headOption, allDigits.lastOption)
     }
-  
-    val digits = replacedLine.filter(_.isDigit)
-    digits.length match {
-      case 0 => 0 // No digits in the line
-      case 1 => (digits + digits).toInt // Only one digit, duplicate it
-      case _ => (digits.head.toString + digits.last.toString).toInt // Two or more digits
-    }
-  
-  
+    .collect { case (Some(first:Int), Some(last:Int)) => first * 10 + last }
+    .sum
+}
 
-  }
 
 
  println("\nDay 1 solutions \n------------")
 
-val calValues_1 = lines.map(extractCalibrationValue_1a)
-val totalCal_1 = calValues_1.sum
-println(s"Total Calibration Value for 1st problem: $totalCal_1")
+println(s"part 1: $part1")
+println(s"part 2: $part2")
 
-// not working correctly :(
-val calValues_2 = lines.map(extractCalibrationValue_1b)
-val totalCal_2 = calValues_2.sum
-println(s"Total Calibration Value for 2nd problem: $totalCal_2")
+
 
 
 
